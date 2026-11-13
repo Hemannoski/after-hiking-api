@@ -1,0 +1,27 @@
+﻿# Environnement virtuel Python
+.venv/
+__pycache__/
+*.pyc
+# Variables d'environnement (secrets, jamais sur Git)
+.env
+# Base de données locale si jamais générée en SQLite
+db.sqlite3
+# Fichiers Django générés
+staticfiles/
+media/
+# VS Code
+.vscode/
+# Système
+.DS_Store
+Thumbs.db
+# La clé JSON
+secrets/
+
+# - __pycache__ (fichiers compilés, régénérables)
+__pycache__
+
+# --- Python & Django ---
+*.log
+local_settings.py
+db.sqlite3-journal
+
