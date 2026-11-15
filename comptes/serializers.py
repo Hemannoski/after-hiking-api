@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .validators import valider_photo_profil
 
 from .models import Utilisateur
+from .validators import valider_photo_profil
 
 
 class InscriptionSerializer(serializers.ModelSerializer):
@@ -58,4 +58,32 @@ class ProfilPublicSerializer(serializers.ModelSerializer):
         model = Utilisateur
         fields = [
             'id', 'nom_utilisateur', 'nom_complet', 'bio', 'ville', 'photo_profil', 'nb_randonnees']
+        read_only_fields = fields
+
+
+
+class EnregistrerAppareilSerializer(serializers.ModelSerializer):
+    """
+    Valide le corps de POST /appareils : enregistrement d'un appareil avec son jeton FCM.
+    Seul l'utilisateur authentifié peut enregistrer un appareil à son compte.
+    """
+
+    class Meta:
+        model = Utilisateur  # Le modèle Appareil sera utilisé dans la vue
+        fields = ['type_appareil', 'jeton_notification_appareil']
+        extra_kwargs = {
+            'type_appareil': {'required': True, 'allow_blank': False},
+            'jeton_notification_appareil': {'required': True, 'allow_blank': False},
+        }
+
+
+class AppareilSerializer(serializers.ModelSerializer):
+    """
+    Serializer en lecture seule pour afficher les informations d'un appareil.
+    Utilisé pour retourner la liste des appareils d'un utilisateur.
+    """
+
+    class Meta:
+        model = Utilisateur  # Sera remplacé par Appareil dans l'import
+        fields = ['id', 'type_appareil', 'date_connexion', 'date_derniere_connexion']
         read_only_fields = fields

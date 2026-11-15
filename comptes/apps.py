@@ -1,8 +1,8 @@
+import cloudinary
 import firebase_admin
-from firebase_admin import credentials
 from django.apps import AppConfig
 from django.conf import settings
-import cloudinary
+from firebase_admin import credentials
 
 
 class ComptesConfig(AppConfig):

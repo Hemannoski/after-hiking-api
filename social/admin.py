@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import Commentaire, Like
+
 
 @admin.register(Commentaire)
 class CommentaireAdmin(admin.ModelAdmin):

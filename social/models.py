@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -36,8 +35,8 @@ class Commentaire(models.Model):
         verbose_name_plural = "Commentaires"
         ordering = ['date_creation_commentaire']
 
-    def __str__(self) -> str:
-        return f"{self.texte}"
+    def __str__(self):
+        return f"Commentaire de {self.commentateur}"
 
 
 class Like(models.Model):
@@ -72,5 +71,5 @@ class Like(models.Model):
             models.UniqueConstraint(fields=['auteur', 'randonnee'], name='unique_like_par_utilisateur_et_randonnee')
         ]
 
-    def __str__(self) -> str:
-        return f"{self.date_du_like} - Date du like"
+    def __str__(self):
+        return f"{self.auteur} -> {self.randonnee}"

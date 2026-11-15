@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class TypeNotification(models.TextChoices):
     LIKE = "like", "Like"
     COMMENTAIRE = "commentaire", "Commentaire"

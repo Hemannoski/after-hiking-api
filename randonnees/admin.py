@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import Randonnee, StatistiqueRandonnee
+
 
 @admin.register(Randonnee)
 class RandonneeAdmin(admin.ModelAdmin):

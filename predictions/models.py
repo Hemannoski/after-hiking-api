@@ -1,5 +1,6 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 
 class Prediction(models.Model):
     """Ce modèle stocke les prédictions (fourchettes) générées par le modèle IA pour une randonnée."""

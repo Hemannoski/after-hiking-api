@@ -1,30 +1,34 @@
+import logging
+from typing import Any, cast
+
 from django.db import IntegrityError, transaction
+from django.db.models import Count, Q, QuerySet
+from firebase_admin.exceptions import FirebaseError
 from rest_framework import generics, status
 from rest_framework.exceptions import NotAuthenticated
-from rest_framework.permissions import AllowAny
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
-from rest_framework.request import Request
-from typing import Any, cast
-import logging
 
-from .firebase import verifier_jeton_firebase, supprimer_compte_firebase
-from firebase_admin.exceptions import FirebaseError
-from .stockage import StockageIndisponible, envoyer_photo_profil, supprimer_photo_profil
-from .models import Utilisateur
+from randonnees.models import Randonnee, StatutRandonnee
+from randonnees.serializers import RandonneeListeSerializer
+
+from .firebase import supprimer_compte_firebase, verifier_jeton_firebase
+from .models import Appareil, Utilisateur
 from .serializers import (
-    InscriptionSerializer, UtilisateurSerializer, ModifierProfilSerializer, 
-    ProfilPublicSerializer, ProfilPublicSerializer, PhotoProfilSerializer)
-
+    AppareilSerializer,
+    EnregistrerAppareilSerializer,
+    InscriptionSerializer,
+    ModifierProfilSerializer,
+    PhotoProfilSerializer,
+    ProfilPublicSerializer,
+    UtilisateurSerializer,
+)
+from .stockage import StockageIndisponible, envoyer_photo_profil, supprimer_photo_profil
 from .utils import choisir_nom_utilisateur, generer_nom_utilisateur
-
-from rest_framework.parsers import MultiPartParser
-
-from django.db.models import Count, Q, QuerySet
-
-from randonnees.models import StatutRandonnee
-
 
 logger = logging.getLogger(__name__)
 
@@ -226,3 +230,101 @@ class RechercheUtilisateursView(generics.ListAPIView):
         
         # Tri stable
         return utilisateurs.order_by('nom_complet', 'id')
+
+
+
+class UtilisateurRandonneesView(generics.ListAPIView):
+    """
+    GET /utilisateurs/{id_utilisateur}/randonnees : Randonnées publiées par cet utilisateur.
+    """
+
+    serializer_class = RandonneeListeSerializer  # À importer depuis randonnees.serializers
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+
+    def get_queryset(self): #type: ignore
+        pk = self.kwargs[self.lookup_field]
+        return (
+            Randonnee.objects
+            .filter(auteur_id=pk, status_randonnee=StatutRandonnee.PUBLIE)
+            .select_related('auteur', 'media_couverture', 'statistiques')
+            .order_by('-date_publication_randonnee')
+        )
+
+
+
+
+
+class AppareilView(APIView):
+    """
+    POST /appareils : Enregistrer un appareil avec son jeton de notification Firebase.
+    
+    L'application mobile appelle cette route à chaque lancement pour s'assurer
+    que le jeton FCM (Firebase Cloud Messaging) est bien enregistré en base.
+    Si l'appareil existe déjà (même jeton), on met juste à jour la date.
+    Sinon, on crée un nouvel enregistrement.
+    """
+
+    def post(self, request):
+        utilisateur = cast(Utilisateur, request.user)
+
+        serializer = EnregistrerAppareilSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        donnees = cast(dict[str, Any], serializer.validated_data)
+        jeton = donnees['jeton_notification_appareil']
+        type_appareil = donnees['type_appareil']
+
+        # Vérifie si l'appareil existe déjà pour cet utilisateur
+        appareil = Appareil.objects.filter(
+            utilisateur=utilisateur,
+            jeton_notification_appareil=jeton
+        ).first()
+
+        if appareil is not None:
+            # L'appareil existe déjà : on met juste à jour la dernière connexion
+            # (auto_now=True sur date_derniere_connexion le fait automatiquement)
+            return Response(
+                AppareilSerializer(appareil, context={'request': request}).data,
+                status=status.HTTP_200_OK
+            )
+        else:
+            # Nouvel appareil : on le crée
+            appareil = Appareil.objects.create(
+                utilisateur=utilisateur,
+                type_appareil=type_appareil,
+                jeton_notification_appareil=jeton
+            )
+            return Response(
+                AppareilSerializer(appareil, context={'request': request}).data,
+                status=status.HTTP_201_CREATED
+            )
+
+
+class AppareilDetailView(APIView):
+    """
+    DELETE /appareils/{id} : Supprimer un appareil lors de la déconnexion.
+    
+    Utile quand l'utilisateur se déconnecte ou change de téléphone.
+    On vérifie que l'appareil appartient bien à l'utilisateur authentifié.
+    """
+
+    def delete(self, request, id):
+        utilisateur = cast(Utilisateur, request.user)
+
+        appareil = Appareil.objects.filter(
+            id=id,
+            utilisateur=utilisateur
+        ).first()
+
+        if appareil is None:
+            return Response(
+                {'detail': "Cet appareil n'existe pas ou ne vous appartient pas."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        appareil.delete()
+        return Response(
+            {'detail': "Appareil supprimé avec succès."},
+            status=status.HTTP_204_NO_CONTENT
+        )

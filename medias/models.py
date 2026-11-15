@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class TypeMedias(models.TextChoices):
     PHOTO = "photo", "Photo"
     VIDEO = "video", "Video"
@@ -34,12 +35,13 @@ class Media(models.Model):
         help_text="Le lien du média (la photo ou vidéo) de la randonnée hébergé sur le cloud."                
     )
 
-    identifiant_mux = models.CharField(
+    public_id = models.CharField(
+        max_length=255,
         blank=True,
-        null=True,
-        max_length=100,
-        help_text="L'identifiant technique de la vidéo (uniquement pour les vidéos Mux)."
+        default="",
+        help_text="Identifiant du fichier chez Cloudinary, nécessaire pour le supprimer."
     )
+
 
     duree_video_en_seconde = models.IntegerField(
         help_text="Le temps que fait la vidéo en seconde uniquement pour les vidéos", 

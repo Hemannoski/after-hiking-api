@@ -18,8 +18,8 @@ depuis le fichier .env grâce à python-decouple.
 """
 
 from pathlib import Path
-from decouple import config, Csv
 
+from decouple import Csv, config
 
 # BASE_DIR pointe vers le dossier backend/ (deux niveaux au-dessus de ce fichier,
 # car ce fichier est maintenant dans config/settings/, pas directement dans config/)

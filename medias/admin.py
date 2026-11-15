@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import Media
+
 
 @admin.register(Media)
 class MediaAdmin(admin.ModelAdmin):
@@ -13,7 +15,7 @@ class MediaAdmin(admin.ModelAdmin):
         "taille_en_octet",
         "status_traitement",
         "url_media",
-        "identifiant_mux",
+        "public_id",
         "duree_video_en_seconde"
     ]
 
@@ -75,7 +77,7 @@ class MediaAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "status_traitement",
-                    "identifiant_mux",
+                    "public_id",
                     "duree_video_en_seconde",
                 ),
             },

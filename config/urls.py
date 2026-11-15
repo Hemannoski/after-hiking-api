@@ -16,13 +16,17 @@ Including another URLconf
 """
 
 
-from django.contrib import admin
-from django.urls import path, include
 from django.conf import settings
+from django.contrib import admin
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('comptes.urls')),
+    path('api/v1/', include('notifications.urls')),
+    path('api/v1', include('medias.urls')),
+    path('api/v1', include('randonnees.urls')),
+    path('api/v1', include('social.urls')),
 ]
 
 # Ajouter les URLs du Debug Toolbar UNIQUEMENT en développement

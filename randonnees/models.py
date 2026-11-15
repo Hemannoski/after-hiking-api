@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class StatutRandonnee(models.TextChoices):
     BROUILLON = "brouillon", "Brouillon"
     PUBLIE = "publie", "Publié"
