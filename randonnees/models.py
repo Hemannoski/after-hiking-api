@@ -19,7 +19,8 @@ class Randonnee(models.Model):
     auteur = models.ForeignKey(
         'comptes.Utilisateur', 
         on_delete=models.CASCADE,
-        help_text="La clé étrangère de la personne qui a publié la randonnée."
+        help_text="La clé étrangère de la personne qui a publié la randonnée.",
+        related_name='randonnees'
     )
 
     media_couverture = models.ForeignKey(

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Utilisateur
+from .models import Utilisateur, Appareil
 from .validators import valider_photo_profil
 
 
@@ -61,6 +61,14 @@ class ProfilPublicSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class RechercheUtilisateurSerializer(serializers.ModelSerializer):
+    """Résultat de GET /recherche/utilisateurs (lecture seule)."""
+
+    class Meta:
+        model = Utilisateur
+        fields = ['id', 'nom_utilisateur', 'nom_complet', 'photo_profil', 'ville']
+        read_only_fields = fields
+
 
 class EnregistrerAppareilSerializer(serializers.ModelSerializer):
     """
@@ -69,7 +77,7 @@ class EnregistrerAppareilSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model = Utilisateur  # Le modèle Appareil sera utilisé dans la vue
+        model = Appareil
         fields = ['type_appareil', 'jeton_notification_appareil']
         extra_kwargs = {
             'type_appareil': {'required': True, 'allow_blank': False},
@@ -84,6 +92,6 @@ class AppareilSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model = Utilisateur  # Sera remplacé par Appareil dans l'import
+        model = Appareil
         fields = ['id', 'type_appareil', 'date_connexion', 'date_derniere_connexion']
         read_only_fields = fields

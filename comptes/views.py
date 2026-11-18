@@ -25,6 +25,7 @@ from .serializers import (
     ModifierProfilSerializer,
     PhotoProfilSerializer,
     ProfilPublicSerializer,
+    RechercheUtilisateurSerializer,
     UtilisateurSerializer,
 )
 from .stockage import StockageIndisponible, envoyer_photo_profil, supprimer_photo_profil
@@ -209,7 +210,9 @@ class ProfilUtilisateurView(generics.RetrieveAPIView):
 class RechercheUtilisateursView(generics.ListAPIView):
     """GET /recherche/utilisateurs : liste et recherche des randonneurs (?q=texte)."""
     
-    filter_backends = []  # Pas de backend DRF, on fait le filtre manuellement
+
+    serializer_class = RechercheUtilisateurSerializer
+    filter_backends = []
 
     def get_queryset(self) -> QuerySet[Utilisateur]: #type: ignore[override]
         moi = cast(Utilisateur, self.request.user)
